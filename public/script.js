@@ -25,7 +25,16 @@ async function sendMessage() {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-
+            const askresponse = await fetch ('http://localhost:3000/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: userQuery,
+                    systemtxt: document.getElementById('systemtxt').value,
+                }), 
+            });
             const data = await response.json();
             // Process the search results here
             const searchResults = data.items;
@@ -36,8 +45,7 @@ async function sendMessage() {
                 
                 const systemtxt = document.getElementById('systemtxt');
                 systemtxt.value = `Your name is Jorge, you are an expert at answering this question: ${searchQuery}, and to answer it you use this information: ${title}, ${snippet}, ${link}`; 
-                //document.getElementById('usertxt').value = `${searchQuery}?`;
-                //document.getElementById('systemtxt').value = "";
+                
                 console.log(document.getElementById('systemtxt').value);
                 
                 
@@ -49,7 +57,8 @@ async function sendMessage() {
                 console.log(`Snippet: ${snippet}`);
                 console.log(`Link: ${link}`);
                 
-                
+                //document.getElementById('usertxt').value = `${searchQuery}?`;
+                //document.getElementById('systemtxt').value = "";
                 
 
                

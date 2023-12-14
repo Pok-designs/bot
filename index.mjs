@@ -39,8 +39,8 @@ app.get('/search', async (req, res) => {
 
 app.post('/ask', async (req, res) => {
     const userInput = req.body.query;
-    const systemcontent = (req.body.systemtxt);
-    
+    const systemcontent = String(req.body.systemtxt);
+    console.log('Request Body:', req.body);
     //const jorge = 'jorge;'
     //const SEARCH_KEYWORD = 'Search';
     console.log(systemcontent);
@@ -57,32 +57,37 @@ app.post('/ask', async (req, res) => {
       //const systemanswercontent = String(req.body.systemtxtansw);
       
       // Construct messages by iterating over the history
-      const messages = chatHistory.map(([role, content]) => [
-        {
-          role: "system",
-          content: systemcontent,
-        }
-      ]);
+      const messages = chatHistory.map(([role, content]) => ({
+        role: role,
+        content: content,
+      }));
+
+      const systemMessage = {
+        role: "system",
+        content: systemcontent //|| "Introduce yourself, Your name is Jorge, you can help?",
+      };
       
+      // Add the system message to the messages array
+      messages.push(systemMessage);
+      // Add the system message to the messages array
+
+      messages.push({
+        role: "system",
+        content: `${systemcontent}`,
+      });
       
-       console.log (messages);
-      // Add latest user input
-      messages.push({ role:  'user', content: userInput });
-      
-      
-      
-  
-  
-      // Call the API with user input & history
+      // Make the API call to OpenAI
       const completion = await OpenAi.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: messages,
         max_tokens: 1000,
       });
-  
+      
+      console.log(systemcontent);
       // Get completion text/content
       const completionText = completion.choices[0].message.content;
-  
+      console.log(completionText);
+
       if (userInput.toLowerCase() === 'exit') {
         console.log(colors.green('Bot: ') + completionText);
         res.json({ botResponse: completionText }); // Send a JSON response

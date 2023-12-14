@@ -1,0 +1,78 @@
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>agent</title>
+    <link rel="stylesheet" href="index.css">
+
+    
+   
+</head>
+
+<body>
+
+    <div>
+    <form action="post">
+    <input type="text" name="" id="systemtxt" cols="30" rows="10" value="hei"></input>
+    <button  onclick="event.preventDefault();" id="button4">Send systemtxt</button>
+    </form>
+    </div>
+
+    <div id="botoutput" class="botoutput">
+        <label for="output"></label>
+        <!-- Change input to textarea -->
+        <textarea disabled name="botoutput" id="output" placeholder="Hi there!" rows="4" cols="50"></textarea>
+        
+    </div>
+
+    <div id="languagediv"> <select name="lang" id="language"></select>
+      <select name="speed" id="speed">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="2">2x</option>
+      </select>
+      <button id="button2" >Speak</button>
+      <button id="button3" >Search</button>
+    </div>
+
+    <div id="userinput" class="userinput">
+        <label for="query"></label>
+        <input type="text" name="userinput" id="query" placeholder="Write here" onkeydown="handleKeyDown(event)" size="20" value="">
+        <button hidden id="button1" onclick="sendMessage()">Send</button>
+       
+      </div>
+      
+      <div id="userinput" class="userinput">
+        <label for="query"></label>
+        <textarea type="text" name="userinput" id="pastebin" class="pastebin" placeholder="pastebin" size="20" value=""></textarea>
+        
+      </div>
+      
+      <script>
+        function handleKeyDown(event) {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            sendMessage();
+          }
+        }
+      
+        function sendMessage() {
+          var inputText = document.getElementById("query").value;
+          console.log("Entered text: " + inputText);
+          // Add your desired functionality here
+        }
+
+       
+
+      </script>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>

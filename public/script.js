@@ -44,13 +44,21 @@ async function sendMessage() {
                 const link = result.link;
                 
                 const systemtxt = document.getElementById('systemtxt');
-                systemtxt.value = `Your name is Jorge, you are an expert at answering this question: ${searchQuery}, and to answer it you use this information: ${title}, ${snippet}, ${link}`; 
+                systemtxt.value = `Your are Jorge, you are an expert at answering this question: ${searchQuery}, and to answer it you use this information: ${title}, ${snippet}, ${link}`; 
                 
                 console.log(document.getElementById('systemtxt').value);
                 
                 
                 document.getElementById('button4').click();
+                if (userQuery.toLowerCase().includes(SEARCH_KEYWORD.toLowerCase())) {
+                    userQuery.toLowerCase().replace(SEARCH_KEYWORD.toLowerCase(), '').trim();
+                };
+                    document.getElementById('button1').click();
+                    
+                    
                 
+              
+
 
                 // Process or display the information as needed
                 console.log(`Title: ${title}`);
@@ -73,7 +81,9 @@ async function sendMessage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ query: userQuery }), 
+                body: JSON.stringify({ 
+                    query: userQuery,
+                    systemtxt: document.getElementById('systemtxt').value, }), 
             });
 
             if (!response.ok) {

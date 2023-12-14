@@ -62,25 +62,19 @@ app.post('/ask', async (req, res) => {
         content: content,
       }));
 
-      const systemMessage = {
-        role: "system",
-        content: systemcontent //|| "Introduce yourself, Your name is Jorge, you can help?",
-      };
       
-      // Add the system message to the messages array
-      messages.push(systemMessage);
-      // Add the system message to the messages array
 
       messages.push({
         role: "system",
-        content: `${systemcontent}`,
+        content: `${systemcontent}` || "Your name is Jorge, you often introduce yourself with your name, you are super cool and often use jokes and funny ways of speaking, but you are also very intelligent and efficient. You answere with short answers." 
       });
       
       // Make the API call to OpenAI
       const completion = await OpenAi.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: messages,
-        max_tokens: 1000,
+        max_tokens: 200,
+        temperature: 0,
       });
       
       console.log(systemcontent);

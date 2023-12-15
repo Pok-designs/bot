@@ -16,7 +16,7 @@
 
 <body>
 
-    <div>
+    <div hidden>
     <form method="post" action="">
     <input type="text" name="" id="systemtxt" cols="30" rows="10" value=""></input>
     <button  onclick="event.preventDefault();" id="button4">Send systemtxt</button>
@@ -37,12 +37,12 @@
         <option value="2">2x</option>
       </select>
       <button id="button2" >Speak</button>
-      <button id="button3" >Search</button>
+      <button hidden id="button3" >Search</button >
     </div>
 
     <div id="userinput" class="userinput">
         <label for="query"></label>
-        <input type="text" name="userinput" id="query" placeholder="Write here" onkeydown="handleKeyDown(event)" size="20" value="">
+        <textarea type="text" name="userinput" id="query" placeholder="Write here" onkeydown="handleKeyDown(event)" size="20" value=""></textarea>
         <button hidden id="button1" onclick="sendMessage()">Send</button>
        
       </div>

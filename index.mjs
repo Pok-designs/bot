@@ -43,11 +43,11 @@ app.post('/ask', async (req, res) => {
     console.log('Request Body:', req.body);
     //const jorge = 'jorge;'
     //const SEARCH_KEYWORD = 'Search';
-    console.log(systemcontent);
+    //console.log(systemcontent);
     console.log("input", userInput);
    
-   
-    
+    const searchQuery = String(req.body.searchQuery);
+    console.log(searchQuery);
     try {
       
       
@@ -60,27 +60,35 @@ app.post('/ask', async (req, res) => {
       const messages = chatHistory.map(([role, content]) => ({
         role: role,
         content: content,
+        
       }));
 
-      
+      messages.push({ role: 'user', content: userInput });
 
       messages.push({
         role: "system",
-        content: `${systemcontent}` || "Your name is Jorge, you often introduce yourself with your name, you are super cool and often use jokes and funny ways of speaking, but you are also very intelligent and efficient. You answere with short answers." 
+        content: `${systemcontent}(Remember to not apologize or say sorry)` || "(Remember to not apologize or say sorry). You are a super cool and helpfull AI assistant, you give answers in a funny manner, but you are also very intelligent and efficient. Use earlier chat history for extra information.", 
+      },{
+        role: "user",
+        content: `${searchQuery}` || ""
+      },{
+        role: "system",
+        content: "(remember not to apologize)" || `(Remember to not apologize or say sorry). Answer about ${systemcontent}.`
+
       });
       
       // Make the API call to OpenAI
       const completion = await OpenAi.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: messages,
-        max_tokens: 200,
-        temperature: 0,
+        max_tokens: 1024,
+        temperature: 0.3,
       });
       
-      console.log(systemcontent);
+      
       // Get completion text/content
       const completionText = completion.choices[0].message.content;
-      console.log(completionText);
+      //console.log(completionText);
 
       if (userInput.toLowerCase() === 'exit') {
         console.log(colors.green('Bot: ') + completionText);
@@ -88,12 +96,14 @@ app.post('/ask', async (req, res) => {
         return;
       }
   
-      console.log(colors.green('Bot: ') + completionText);
+      //console.log(colors.green('Bot: ') + completionText);
       res.json({ botResponse: completionText }); // Send a JSON response
   
       // Update history with user input and assistant response
       chatHistory.push(['user', userInput]);
-      chatHistory.push(['assistant', completionText]);
+      chatHistory.push(['system', completionText]);
+      chatHistory.push(['system', systemcontent]);
+
     } catch (error) {
       console.error(colors.red(error));
       res.status(500).json({ error: 'Internal Server Error' }); // Send a JSON error response

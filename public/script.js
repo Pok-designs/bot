@@ -1,14 +1,55 @@
 
+//scrape
+
+async function performWebScraping(link) {
+    const response = await fetch('http://localhost:3000/scrape', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ link }),
+        
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const { ocrText } = await response.json();
+    
+    const scrapetext = ocrText;
+
+    // Now you can use the OCR text as needed in your client-side code
+    const systemTxt = document.getElementById('systemtxt');
+    systemTxt.value += `Text from scraping: ${ocrText}`;
+    console.log('link: ' + link);
+}
 
 
 // send user input
 // Trigger search keyword
 
+async function fetchHtmlContent(link) {
+    try {
+        const response = await fetch(link);
 
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const htmlContent = await response.text();
+        return htmlContent;
+    } catch (error) {
+        console.error('Error fetching HTML content:', error);
+        return null;
+    }
+}
 
 const SEARCH_KEYWORD = 'Search';
 
 async function sendMessage() {
+    
+  
     const userQuery = document.getElementById('query').value;
     const outputElement = document.getElementById('output');
 
@@ -22,7 +63,7 @@ async function sendMessage() {
             console.log(`Search triggered with query: ${searchQuery}`);
             
             // Use fetch or any other method to perform the search 
-            const response = await fetch(`https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(searchQuery)}&key=REMOVED_API_KEY&cx=14859d15223854b96&num=3`);
+            const response = await fetch(`https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(searchQuery)}&key=REMOVED_API_KEY&cx=14859d15223854b96&num=1`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -35,51 +76,64 @@ async function sendMessage() {
                     query: userQuery,
                     systemtxt: document.getElementById('systemtxt').value,
                     searchQuery: searchQuery,
+                    
                 }), 
             });
+
+
             const data = await response.json();
             // Process the search results here
             const searchResults = data.items;
           
             let systemTxtValue = ` Answer :`;
-
-            searchResults.forEach(result => {
+         
+            searchResults.forEach (result => {
             const title = result.title;
             const snippet = result.snippet;
             const link = result.link;
+            
+            async function scr () {
+            const linkToScrape = link;
+            await performWebScraping(linkToScrape);
+            };
+
+            scr ();
+            //console.log(link);
 
              // Append each result to the accumulated string
-             systemTxtValue += `Title: ${title}\nSnippet: ${snippet}\nLink: ${link}\n\n`;
+             systemTxtValue += `Title: ${title}\nSnippet: ${snippet}\nLink: ${link} \n\n`;
              console.log(`Title: ${title}`);
              console.log(`Snippet: ${snippet}`);
              console.log(`Link: ${link}`);
              });
-
+             
              // Set the accumulated value to systemtxt.value
              const systemTxt = document.getElementById('systemtxt');
              systemTxt.value = systemTxtValue;
 
-                // Process or display the information as needed
                 
-                
-                //document.getElementById('usertxt').value = `${searchQuery}?`;
-                //document.getElementById('systemtxt').value = "";
-                
-            
-                 
-                
-                //console.log(document.getElementById('systemtxt').value);
-                
-                
-                //document.getElementById('button4').click();
-                //if (userQuery.toLowerCase().includes(SEARCH_KEYWORD.toLowerCase())) {
-                //    userQuery.toLowerCase().replace(SEARCH_KEYWORD.toLowerCase(), '').trim();
-                //    console.log('fjerna search');
-                //};
+              // Send a request to the server to scrape the link
+              const scrapeResponse = await fetch('http://localhost:3000/scrape', {
+                 method: 'POST',
+                 headers: {
+                   'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                  link: searchResults[0].link, // Assuming you want to scrape the first link
+                 }),
+                });
 
+             if (scrapeResponse.ok) {
+                 const scrapeResult = await scrapeResponse.json();
+                 console.log('Scraped Link:', scrapeResult.link);
+                 console.log('OCR Text:', scrapeResult.ocrText);
+
+                 // Include the OCR text in the system message
+                systemTxt.value += `\n\n OCR Text from scrape: ${scrapeResult.ocrText}`;
+               }
                
 
-                document.getElementById('query').value = 'continue';
+                document.getElementById('query').value = 'what information do you have about ' + searchQuery + '?';
                 console.log('empty input field');
                 document.getElementById('button1').click();
                 document.getElementById('query').value = '';

@@ -2,11 +2,16 @@ import OpenAi from './config/open-ai.js';
 import express from 'express';
 import bodyParser from 'body-parser';
 import colors from 'colors';
-import skey from './config/searchapi.js';
+import Tesseract from 'tesseract.js';
+import { chromium } from 'playwright';
+import path from 'path';
+
 
 const app = express();
 const port = 3000;
 
+
+//server
 app.use(bodyParser.json());
 
 const chatHistory = []; // Store conversation history
@@ -36,18 +41,50 @@ app.get('/search', async (req, res) => {
 });
 
 
+//scrape
+
+
+
+async function performWebScraping(link) {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  await page.goto(link);
+  await page.screenshot({ path: 'screenshot.png', fullPage: true });
+ 
+  await browser.close();
+}
+
+async function performOCR() {
+  const { data: { text } } = await Tesseract.recognize('screenshot.png', 'eng', { logger: (info) => console.log(info) });
+  return text;
+}
+
+app.use(express.json());
+
+app.post('/scrape', async (req, res) => {
+  const link = req.body.link;
+  await performWebScraping(link);
+
+  const ocrText = await performOCR();
+  res.json({ ocrText });
+});
+
+
+//chat
 
 app.post('/ask', async (req, res) => {
     const userInput = req.body.query;
     const systemcontent = String(req.body.systemtxt);
+    const scrapetext = req.body.ocrText;
     console.log('Request Body:', req.body);
     //const jorge = 'jorge;'
     //const SEARCH_KEYWORD = 'Search';
     //console.log(systemcontent);
     console.log("input", userInput);
    
-    const searchQuery = String(req.body.searchQuery);
-    console.log(searchQuery);
+    const searchQuery = req.body.searchQuery;
+    //console.log(searchQuery); 
     try {
       
       
@@ -82,7 +119,7 @@ app.post('/ask', async (req, res) => {
         model: 'gpt-3.5-turbo',
         messages: messages,
         max_tokens: 1024,
-        temperature: 0.3,
+        temperature: 0.5,
       });
       
       

@@ -21,7 +21,7 @@ async function performWebScraping(link) {
 
     // Now you can use the OCR text as needed in your client-side code
     const systemTxt = document.getElementById('systemtxt');
-    systemTxt.value += `Text from scraping: ${ocrText}`;
+    systemTxt.value += `first Text from scraping: ${ocrText}`;
     console.log('link: ' + link);
 }
 
@@ -85,13 +85,18 @@ async function sendMessage() {
             // Process the search results here
             const searchResults = data.items;
           
-            let systemTxtValue = ` Answer :`;
+            let systemTxtValue = `You use the following info to answer the question, find information or make a resume if you can't answere the question in a concrete way. `;
          
-            searchResults.forEach (result => {
+            const scrapePromises = searchResults.forEach (result => {
             const title = result.title;
             const snippet = result.snippet;
             const link = result.link;
             
+            const linkHeader = document.getElementById('linkheader');
+            linkHeader.innerText = link;
+            linkHeader.href = link;
+            console.log(linkHeader.value);
+
             async function scr () {
             const linkToScrape = link;
             await performWebScraping(linkToScrape);
@@ -127,13 +132,17 @@ async function sendMessage() {
                  const scrapeResult = await scrapeResponse.json();
                  console.log('Scraped Link:', scrapeResult.link);
                  console.log('OCR Text:', scrapeResult.ocrText);
-
+                 
                  // Include the OCR text in the system message
-                systemTxt.value += `\n\n OCR Text from scrape: ${scrapeResult.ocrText}`;
+                systemTxt.value += `\n\n` + `last OCR Text from scrape: ${scrapeResult.ocrText}`;
                }
                
+               if (Array.isArray(scrapePromises) && scrapePromises.length > 0) {
+                // Wait for all the asynchronous operations to complete
+                await Promise.all(scrapePromises);
+               }
 
-                document.getElementById('query').value = 'what information do you have about ' + searchQuery + '?';
+                document.getElementById('query').value = ' make a summary from the info you got, or respond about this question (Important: include website link at the end of your answer, under a line break): ' + searchQuery + '?';
                 console.log('empty input field');
                 document.getElementById('button1').click();
                 document.getElementById('query').value = '';
@@ -163,6 +172,8 @@ async function sendMessage() {
             const line = 'REPLY:';
             outputElement.value = outputElement.value + '\n\n' +  line  + '\n\n' + botResponse;
             outputElement.scrollTop = outputElement.scrollHeight;
+            
+            
 
             
             
@@ -218,15 +229,8 @@ populateSpeeds();
 
 // Function to speak bot response
 function speakBotResponse() {
-    
     const outputElement = document.getElementById('output');
-    const botResponse = outputElement.value;
-
-    // Find the last occurrence of "-" in the text
-    const lastHyphenIndex = botResponse.lastIndexOf('REPLY:');
-
-    // Extract the text after the last "-"
-    const textToSpeak = lastHyphenIndex !== -1 ? botResponse.substring(lastHyphenIndex + 1) : botResponse;
+    const botResponse = outputElement.value.split('\n\n').pop(); // Get the last response
 
     // Get the selected voice
     const voiceSelect = document.getElementById('language');
@@ -237,10 +241,14 @@ function speakBotResponse() {
     const selectedSpeed = document.getElementById('speed').value;
 
     let speech = new SpeechSynthesisUtterance();
-    speech.text = textToSpeak;
+    speech.text = botResponse;
     speech.voice = selectedVoice;
     speech.rate = parseFloat(selectedSpeed);
 
+    // Clear the utterance list before speaking
+    window.speechSynthesis.cancel();
+
+    // Start speaking
     window.speechSynthesis.speak(speech);
 }
 

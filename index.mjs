@@ -75,7 +75,14 @@ app.post('/scrape', async (req, res) => {
 
 app.post('/ask', async (req, res) => {
     const userInput = req.body.query;
-    const systemcontent = String(req.body.systemtxt);
+    let systemcontent = String(req.body.systemtxt);
+    
+    let maxLength = 2000;
+
+    // Update systemcontent to the substring result
+    systemcontent = systemcontent.substring(0, maxLength);
+    
+
     const scrapetext = req.body.ocrText;
     console.log('Request Body:', req.body);
     //const jorge = 'jorge;'
@@ -99,19 +106,23 @@ app.post('/ask', async (req, res) => {
         content: content,
         
       }));
+    
 
+     
       messages.push({ role: 'user', content: userInput });
 
       messages.push({
         role: "system",
-        content: `${systemcontent}(Remember to not apologize or say sorry)` || "(Remember to not apologize or say sorry). You are a super cool and helpfull AI assistant, you give answers in a funny manner, but you are also very intelligent and efficient. Use earlier chat history for extra information.", 
+        content: `${systemcontent}` || "You are a super cool and helpfull AI assistant, you give answers in a funny manner, but you are also very intelligent and efficient. Use earlier chat history for extra information.", 
+        
       },{
         role: "user",
-        content: `${searchQuery}` || ""
+        content: `${searchQuery}` || "",
+        
       },{
         role: "system",
-        content: "(remember not to apologize)" || `(Remember to not apologize or say sorry). Answer about ${systemcontent}.`
-
+        content: "" || `Answer about ${systemcontent}.`,
+        
       });
       
       // Make the API call to OpenAI
@@ -119,7 +130,7 @@ app.post('/ask', async (req, res) => {
         model: 'gpt-3.5-turbo',
         messages: messages,
         max_tokens: 1024,
-        temperature: 0.5,
+        temperature: 0,
       });
       
       

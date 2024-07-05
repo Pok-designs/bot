@@ -46,6 +46,7 @@ async function fetchHtmlContent(link) {
 }
 
 const SEARCH_KEYWORD = 'Search';
+const SEESCREEN_KEYWORD = 'seescren'
 
 async function sendMessage() {
     
@@ -54,6 +55,53 @@ async function sendMessage() {
     const outputElement = document.getElementById('output');
 
     try {
+        // Check if the "seescreen" keyword is present in the user's query----
+        if (userQuery.toLowerCase().includes(SEESCREEN_KEYWORD.toLowerCase())) {
+            console.log(`Seescreen triggered with query: ${userQuery}`);
+
+            // Capture screenshot and perform OCR
+            const seescreenResponse = await fetch('http://localhost:3000/seescreen', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: userQuery }),
+            });
+
+            if (!seescreenResponse.ok) {
+                throw new Error(`HTTP error! Status: ${seescreenResponse.status}`);
+            }
+
+            const seescreenData = await seescreenResponse.json();
+            const ocrText = seescreenData.ocrText;
+            const systemTxt = document.getElementById('systemtxt');
+            systemTxt.value = `Extracted text from screenshot: ${ocrText}\n\n`;
+
+            // Send the user query along with the extracted text to GPT
+            const gptResponse = await fetch('http://localhost:3000/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: userQuery,
+                    systemtxt: systemTxt.value,
+                }),
+            });
+
+            if (!gptResponse.ok) {
+                throw new Error(`HTTP error! Status: ${gptResponse.status}`);
+            }
+
+            const gptData = await gptResponse.json();
+            const botResponse = gptData.botResponse;
+
+            // Update output element with bot response
+            const line = 'REPLY:';
+            outputElement.value = `${outputElement.value}\n\n${line}\n\n${botResponse}`;
+            outputElement.scrollTop = outputElement.scrollHeight;
+        }
+        //----    
         // Check if the search keyword is present in the user's query
         if (userQuery.toLowerCase().includes(SEARCH_KEYWORD.toLowerCase())) {
             // Remove the keyword to get the actual query for searching
@@ -214,7 +262,7 @@ populateVoices();
 // Function to populate speed options
 function populateSpeeds() {
     const speedSelect = document.getElementById('speed');
-    const speeds = ['0.3', '1', '2']; // Adjust the speed values as needed
+    const speeds = ['1', '1.5', '0.5']; // Adjust the speed values as needed
 
     // Clear existing options
     speedSelect.innerHTML = '';
@@ -230,7 +278,7 @@ populateSpeeds();
 // Function to speak bot response
 function speakBotResponse() {
     const outputElement = document.getElementById('output');
-    const botResponse = outputElement.value.split('\n\n').pop(); // Get the last response
+    const allResponses = outputElement.value.split('REPLY:'); // Split by "REPLY:"
 
     // Get the selected voice
     const voiceSelect = document.getElementById('language');
@@ -240,17 +288,21 @@ function speakBotResponse() {
     // Get the selected speed
     const selectedSpeed = document.getElementById('speed').value;
 
-    let speech = new SpeechSynthesisUtterance();
-    speech.text = botResponse;
-    speech.voice = selectedVoice;
-    speech.rate = parseFloat(selectedSpeed);
-
     // Clear the utterance list before speaking
     window.speechSynthesis.cancel();
+
+    // Speak only the content after the last "REPLY:"
+    const lastResponse = allResponses.pop().trim(); // Get the last response and remove leading/trailing whitespace
+
+    let speech = new SpeechSynthesisUtterance();
+    speech.text = lastResponse;
+    speech.voice = selectedVoice;
+    speech.rate = parseFloat(selectedSpeed);
 
     // Start speaking
     window.speechSynthesis.speak(speech);
 }
+
 
 // Add an event listener to the new button with id="button2" for speech
 document.getElementById('button2').addEventListener('click', speakBotResponse);
@@ -304,4 +356,26 @@ async function performSearch() {
 
 //---------- Search keyword trigger--------------------------
 
+async function getmessages() {
 
+    
+
+
+    try {
+        const response = await fetch(``);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const searchResults = data.items;
+        searchResults.forEach(result => {
+            const sender = result.sender;
+            const snippet = result.snippet;
+            const link = result.link;
+
+        });
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};

@@ -5,7 +5,10 @@ import colors from 'colors';
 import Tesseract from 'tesseract.js';
 import { chromium } from 'playwright';
 import path from 'path';
+import { FileObjectsPage } from 'openai/resources/files.js';
+import screenshot from 'screenshot-desktop'; // Install with `npm install screenshot-desktop`
 
+import fs from 'fs/promises'; // Use fs.promises for async file operations
 
 const app = express();
 const port = 3000;
@@ -71,13 +74,34 @@ app.post('/scrape', async (req, res) => {
 });
 
 
+//seescreen ----------
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname); // Resolve __dirname for ES Modules
+
+
+app.post('/seescreen', async (req, res) => {
+  try {
+      const screenshotPath = path.join(__dirname, 'macos_screenshot.png');
+      await screenshot({ filename: screenshotPath });
+
+      const { data: { text } } = await Tesseract.recognize(screenshotPath, 'eng', { logger: (info) => console.log(info) });
+      await fs.unlink(screenshotPath); // Delete the image after processing
+
+      console.log('OCR Text:', text); // Log OCR text for debugging
+
+      res.json({ ocrText: text });
+  } catch (error) {
+      console.error('Error capturing and processing screenshot:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 //chat
 
 app.post('/ask', async (req, res) => {
     const userInput = req.body.query;
     let systemcontent = String(req.body.systemtxt);
     
-    let maxLength = 2000;
+    let maxLength = 1000;
 
     // Update systemcontent to the substring result
     systemcontent = systemcontent.substring(0, maxLength);
@@ -119,18 +143,25 @@ app.post('/ask', async (req, res) => {
         role: "user",
         content: `${searchQuery}` || "",
         
+        
       },{
         role: "system",
-        content: "" || `Answer about ${systemcontent}.`,
+        content: "" || ``,
+        
         
       });
       
+      const maxLength = 1000; 
+      if (messages.length > maxLength) {
+         messages.splice(0, messages.length - maxLength);
+      }
+
       // Make the API call to OpenAI
       const completion = await OpenAi.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: messages,
         max_tokens: 1024,
-        temperature: 0,
+        temperature: 0.4,
       });
       
       
@@ -167,8 +198,7 @@ app.listen(port, () => {
 
 
 
-//-------Search--------
-
+//-------display messages--------
 
 
 

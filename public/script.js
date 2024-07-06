@@ -71,37 +71,74 @@ async function sendMessage() {
             if (!seescreenResponse.ok) {
                 throw new Error(`HTTP error! Status: ${seescreenResponse.status}`);
             }
-
+      
             const seescreenData = await seescreenResponse.json();
             const ocrText = seescreenData.ocrText;
             const systemTxt = document.getElementById('systemtxt');
             systemTxt.value = `Extracted text from screenshot: ${ocrText}\n\n`;
+            
+            // Remove the keyword to get the actual query for searching
+            const searchQuery = userQuery.toLowerCase().replace(SEESCREEN_KEYWORD.toLowerCase(), '').trim();
+
+            // Implement your logic to trigger a search with searchQuery
+            console.log(`Search triggered with query: ${searchQuery}`);
+
+            document.getElementById('query').value =  searchQuery + '?';
+
+            await processQuery(searchQuery, ocrText);
+
+            // old-----(ny funksjon)
+            // console.log('empty input field');
+            // document.getElementById('button1').click();
+            // document.getElementById('query').value = '';
+                
+            // const systemtxt = document.getElementById('systemtxt');
+            // systemtxt.value = "";
+            // console.log('ny system text',systemtxt.value)
+             
+            // const askresponse = await fetch ('http://localhost:3000/ask', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({
+            //         query: searchQuery + ocrText,
+            //         systemtxt: document.getElementById('systemtxt').value,
+            //         searchQuery: searchQuery,
+                    
+            //     }), 
+            // });
+            
+
 
             // Send the user query along with the extracted text to GPT
-            const gptResponse = await fetch('http://localhost:3000/ask', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: userQuery,
-                    systemtxt: systemTxt.value,
-                }),
-            });
+            // const gptResponse = await fetch('http://localhost:3000/ask', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({
+            //         query: userQuery,
+            //         systemtxt: systemTxt.value,
+            //     }),
+            // });
 
-            if (!gptResponse.ok) {
-                throw new Error(`HTTP error! Status: ${gptResponse.status}`);
-            }
+            // if (!gptResponse.ok) {
+            //     throw new Error(`HTTP error! Status: ${gptResponse.status}`);
+            // }
 
-            const gptData = await gptResponse.json();
-            const botResponse = gptData.botResponse;
+            // const gptData = await gptResponse.json();
+            // const botResponse = gptData.botResponse;
 
-            // Update output element with bot response
-            const line = 'REPLY:';
-            outputElement.value = `${outputElement.value}\n\n${line}\n\n${botResponse}`;
-            outputElement.scrollTop = outputElement.scrollHeight;
+            // // Update output element with bot response
+            // const line = 'REPLY:';
+            // outputElement.value = `${outputElement.value}\n\n${line}\n\n${botResponse}`;
+            // outputElement.scrollTop = outputElement.scrollHeight;
         }
-        //----    
+        //------------------------------------------------    
+
+
+
         // Check if the search keyword is present in the user's query
         if (userQuery.toLowerCase().includes(SEARCH_KEYWORD.toLowerCase())) {
             // Remove the keyword to get the actual query for searching
@@ -193,7 +230,7 @@ async function sendMessage() {
                 document.getElementById('query').value = ' make a summary from the info you got, or respond about this question (Important: include website link at the end of your answer, under a line break): ' + searchQuery + '?';
                 console.log('empty input field');
                 document.getElementById('button1').click();
-                document.getElementById('query').value = '';
+                //document.getElementById('query').value = '';
                 
                 const systemtxt = document.getElementById('systemtxt');
                 systemtxt.value = "";
@@ -218,7 +255,8 @@ async function sendMessage() {
             const result = await response.json();
             const botResponse = result.botResponse; // Extract the 'botResponse' property
             const line = 'REPLY:';
-            outputElement.value = outputElement.value + '\n\n' +  line  + '\n\n' + botResponse;
+            const you = 'YOU:';
+            outputElement.value = outputElement.value+ '\n\n' + you + '\n\n' + userQuery + '\n\n' +  line  + '\n\n' + botResponse;
             outputElement.scrollTop = outputElement.scrollHeight;
             
             
@@ -232,7 +270,23 @@ async function sendMessage() {
 }
 
 
+async function processQuery(searchQuery, ocrText = '') {
+    const outputElement = document.getElementById('output');
+    const systemTxt = document.getElementById('systemtxt').value;
 
+    const response = await fetch('http://localhost:3000/ask', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+                    query: searchQuery + ocrText,
+                    systemtxt: document.getElementById('systemtxt').value,
+                    searchQuery: searchQuery,
+        }),
+    });
+console.log('processquery kjører');
+};
 
 
 // Function to populate voice options -------------------------------------

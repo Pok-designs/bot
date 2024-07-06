@@ -137,7 +137,7 @@ app.post('/ask', async (req, res) => {
 
       messages.push({
         role: "system",
-        content: `${systemcontent}` || "You are a super cool and helpfull AI assistant, you give answers in a funny manner, but you are also very intelligent and efficient. Use earlier chat history for extra information.", 
+         content: `${systemcontent}` || "", 
         
       },{
         role: "user",

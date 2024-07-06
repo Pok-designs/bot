@@ -83,7 +83,7 @@ async function sendMessage() {
             // Implement your logic to trigger a search with searchQuery
             console.log(`Search triggered with query: ${searchQuery}`);
 
-            document.getElementById('query').value =  searchQuery + '?';
+            //document.getElementById('query').value =  searchQuery + '?';
 
             await processQuery(searchQuery, ocrText);
 

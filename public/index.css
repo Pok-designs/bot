@@ -55,7 +55,7 @@ body {
     font-family: monospace;
     font-weight: bold;
     color: rgb(0, 170, 255);
-    font-size: larger;
+    font-size: smaller;
 }
 
 #query {

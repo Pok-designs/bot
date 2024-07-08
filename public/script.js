@@ -227,17 +227,21 @@ async function sendMessage() {
                 await Promise.all(scrapePromises);
                }
 
-                document.getElementById('query').value = ' make a summary from the info you got, or respond about this question (Important: include website link at the end of your answer, under a line break): ' + searchQuery + '?';
+                document.getElementById('query').value = 'Respond about this question (Important: include website link at the end of your answer, under a line break): ' + searchQuery + '?';
                 console.log('empty input field');
-                document.getElementById('button1').click();
-                //document.getElementById('query').value = '';
-                
                 const systemtxt = document.getElementById('systemtxt');
+                document.getElementById('button1').click();
+                document.getElementById('query').value = '';
+                
+                
                 systemtxt.value = "";
                 console.log('ny system text',systemtxt.value)
 
         } else {
             // Proceed with the regular conversation flow
+            console.log('else running');
+
+            
             const response = await fetch('http://localhost:3000/ask', {
                 method: 'POST',
                 headers: {

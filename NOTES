@@ -1,0 +1,5 @@
+//    messages: [
+//         { "role": "user", "content": userInput + systemcontent || "Hi" },
+//         { "role": "assistant", "content": "Sure, i can answere your questions" },
+//         { "role": "user", "content": userInput }
+//       ],

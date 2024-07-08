@@ -47,7 +47,7 @@ body {
 }
 
 #output {
-    margin-top: 10%;
+    margin-top: 5%;
     margin-left: 3%;
     
     height: 40vh; /* Use viewport height unit for height to make it scalable */
@@ -60,13 +60,15 @@ body {
 
 #query {
     width: 50%;
+    height: 15%;
     margin-left: 3%;
     font-family: monospace;
-    font-weight: bold;
+    font-weight: normal;
     
 }
 #pastebin {
     width: 50%;
+    height: 15%;
     margin-left: 3%;
     font-family: monospace;
     font-weight: bold;
@@ -101,6 +103,6 @@ body {
 /* Additional styling for better readability */
 #output, #query, #pastebin {
     padding: 10px;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.9);
 }
 

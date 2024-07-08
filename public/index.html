@@ -10,7 +10,26 @@
     <title>agent</title>
     <link rel="stylesheet" href="index.css">
 
+    <style>
+      body {
+        opacity: 0;
+        transition: opacity 1s ease-in;
+      }
+      
+     
+
+      body.fade-in {
+        opacity: 1;
+      }
     
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          document.body.classList.add('fade-in');
+        }, 100);
+      });
+    </script>    
    
 </head>
 
@@ -36,7 +55,7 @@
         
     </div>
     <div id="link">
-      <header id="header">src:</header>
+      <header id="header">Source:</header>
       <a href="" id="linkheader" target="_blank"></a>
     </div>
 
@@ -46,7 +65,7 @@
         <option value="2" >2x</option>
         <option value="0.5">0.5x</option>
       </select>
-      <button id="button2" >Speak</button>
+      <button id="button2" >Listen</button>
       <button hidden id="button3" >Search</button >
     </div>
 

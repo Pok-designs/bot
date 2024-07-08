@@ -179,7 +179,7 @@ async function sendMessage() {
             
             const linkHeader = document.getElementById('linkheader');
             linkHeader.innerText = link;
-            linkHeader.href = link;
+            linkHeader.href = 'Last provided link: ' + link;
             console.log(linkHeader.value);
 
             async function scr () {
@@ -320,7 +320,7 @@ populateVoices();
 // Function to populate speed options
 function populateSpeeds() {
     const speedSelect = document.getElementById('speed');
-    const speeds = ['1', '1.5', '0.5']; // Adjust the speed values as needed
+    const speeds = ['1.2', '1', '0.5']; // Adjust the speed values as needed
 
     // Clear existing options
     speedSelect.innerHTML = '';

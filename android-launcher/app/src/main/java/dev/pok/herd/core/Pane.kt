@@ -118,9 +118,12 @@ class Pane(
         write("herdr() { sh \"\$HERDR_SHIM\" \"\$@\"; }\n")
     }
 
+    /** Stdin writes must stay in order (the herdr() definition before the first command, etc.). */
+    private val writer = java.util.concurrent.Executors.newSingleThreadExecutor()
+
     private fun write(s: String) {
         val out = stdin ?: return
-        herd.io.execute {
+        writer.execute {
             try { out.write(s.toByteArray()); out.flush() } catch (_: IOException) {}
         }
     }
@@ -194,10 +197,9 @@ class Pane(
         proc = null; stdin = null; shellPid = -1
         running = false; command = null
         pending.setLength(0)
-        if (p != null) herd.io.execute {
-            try { p.outputStream.close() } catch (_: IOException) {}
-            p.destroy()
-        }
+        // Not via [writer]: a write blocked on a full pipe would hold it up. destroy() closes the
+        // pipe, which also unblocks such a write.
+        if (p != null) herd.io.execute { p.destroy() }
     }
 
     // ---- output ------------------------------------------------------------------------------

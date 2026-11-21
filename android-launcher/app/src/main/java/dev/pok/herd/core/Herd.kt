@@ -113,13 +113,15 @@ class Herd private constructor(val ctx: Context) {
         return null
     }
 
+    /** The shell reports /data/data/<pkg>/… while Context gives /data/user/0/<pkg>/…; treat both as ~. */
+    private val homeAliases = listOf(home.path, home.path.replace("/data/user/0/", "/data/data/")).distinct()
+
     fun shortPath(path: String): String {
-        val h = home.path
-        return when {
-            path == h -> "~"
-            path.startsWith("$h/") -> "~" + path.substring(h.length)
-            else -> path
+        for (h in homeAliases) {
+            if (path == h) return "~"
+            if (path.startsWith("$h/")) return "~" + path.substring(h.length)
         }
+        return path
     }
 
     private fun worst(ids: List<Int>) = ids.mapNotNull { panes[it]?.state }.maxByOrNull { it.rank } ?: PaneState.IDLE
@@ -479,12 +481,16 @@ class Herd private constructor(val ctx: Context) {
 
         private val WELCOME = """
             herd — an Android launcher that runs like herdr
-              open <app>         launch an app (fuzzy)       apps [filter]  list apps
-              ctrl+b v / -       split right / down          ctrl+b x       close pane
-              ctrl+b c           new tab                     ctrl+b N       new workspace
-              ctrl+b g           go to any pane              ctrl+b q       detach
-              herdr status       every pane and its state    ctrl+b ?       all keys
-            anything else runs in this pane's shell. no keyboard? use the ⌃B button.
+              open <app>      launch an app (fuzzy)
+              apps [filter]   list apps
+              ctrl+b v / -    split right / down
+              ctrl+b c        new tab
+              ctrl+b g        go to any pane
+              ctrl+b q        detach (panes keep running)
+              ctrl+b ?        all keys
+              herdr status    every pane and its state
+            anything else runs in this pane's shell.
+            no keyboard? use the ⌃B button below.
         """.trimIndent()
     }
 }

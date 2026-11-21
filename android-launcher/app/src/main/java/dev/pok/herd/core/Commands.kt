@@ -175,7 +175,7 @@ class Commands(private val herd: Herd) {
         val async = try {
             dispatch(c, raw)
         } catch (e: CliError) {
-            if (json) out.print(JSONObject().put("error", JSONObject().put("code", e.code).put("message", e.message)).toString(2))
+            if (json) out.print(JSONObject().put("error", JSONObject().put("code", e.code).put("message", e.message)).toString(2).replace("\\/", "/"))
             else out.print("herdr: ${e.message}", Palette.BLOCKED)
             false
         }
@@ -213,7 +213,7 @@ class Commands(private val herd: Herd) {
     private fun usage(text: String) = CliError("usage", "usage: $text")
 
     private fun result(c: Ctx, obj: JSONObject, human: String) {
-        if (c.json) c.out.print(JSONObject().put("result", obj).toString(2)) else c.out.print(human)
+        if (c.json) c.out.print(JSONObject().put("result", obj).toString(2).replace("\\/", "/")) else c.out.print(human)
     }
 
     private fun focusFlag(a: Args) = a.has("focus") && !a.has("no-focus")
@@ -265,7 +265,8 @@ class Commands(private val herd: Herd) {
 
     private fun paneLine(p: Pane): String {
         val mark = if (herd.isFocused(p)) "*" else " "
-        return "$mark %-7s %-8s %-14s %s".format(p.ref, p.state.label, p.title.take(14), herd.shortPath(p.cwd))
+        val cwd = herd.shortPath(p.cwd).takeIf { it != p.title } ?: ""
+        return "$mark %-6s %-7s %s  %s".format(p.ref, p.state.label, p.title.take(16), cwd).trimEnd()
     }
 
     // status ----------------------------------------------------------------------------------
@@ -503,7 +504,7 @@ class Commands(private val herd: Herd) {
     }
 
     private fun err(c: Ctx, code: String, msg: String) {
-        if (c.json) c.out.print(JSONObject().put("error", JSONObject().put("code", code).put("message", msg)).toString(2))
+        if (c.json) c.out.print(JSONObject().put("error", JSONObject().put("code", code).put("message", msg)).toString(2).replace("\\/", "/"))
         else c.out.print("herdr: $msg", Palette.BLOCKED)
     }
 

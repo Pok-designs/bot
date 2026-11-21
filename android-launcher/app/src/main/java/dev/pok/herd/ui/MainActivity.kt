@@ -602,12 +602,12 @@ class MainActivity : Activity(), Herd.Listener {
                 }
                 if (rows.isEmpty()) return@forEach
                 list.addView(mono(11f, Palette.DIM).apply { text = "${w.ref} ${w.label}"; setPadding(0, dp(8f), 0, dp(2f)) })
-                rows.forEach { (t, p) ->
+                rows.forEach { (_, p) ->
                     list.addView(mono(13f).apply {
                         text = SpannableStringBuilder().also {
                             span(it, "● ", p.state.color)
                             span(it, p.title, Palette.FG)
-                            span(it, "  ${p.state.label} · ${w.tabRef(t)} · ${herd.shortPath(p.cwd)}", Palette.DIM)
+                            span(it, "  ${p.state.label} · ${p.ref} · ${herd.shortPath(p.cwd)}", Palette.DIM)
                         }
                         setPadding(dp(4f), dp(8f), 0, dp(8f))
                         setOnClickListener { herd.focusPane(p.id); dlg.dismiss() }

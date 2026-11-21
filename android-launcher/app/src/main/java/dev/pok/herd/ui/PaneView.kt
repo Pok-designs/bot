@@ -85,6 +85,12 @@ class PaneView(ctx: Context, val pane: Pane, private val onTap: (Pane) -> Unit) 
         super.onDetachedFromWindow()
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        // Zoom, splits and the keyboard resize panes; stay pinned to the newest output.
+        if (stickToBottom) scrollToEnd()
+    }
+
     private fun scrollToEnd() = scroll.post { scroll.scrollTo(0, output.height) }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
